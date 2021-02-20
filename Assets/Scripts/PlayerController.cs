@@ -35,6 +35,9 @@ public class PlayerController : MonoBehaviour
 
     private int score;
 
+    private bool changeHealth = false; // this is for demo purposes. remove later
+    [SerializeField] private HealthBar hb;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -51,6 +54,25 @@ public class PlayerController : MonoBehaviour
     {
         float horizontalMove = Input.GetAxis("Horizontal");
         isGrounded = GroundCheck();
+
+        // healthbar demo
+        if (changeHealth == false)
+        {
+            if (Input.GetAxis("Vertical") > 0)
+            {
+                changeHealth = true;
+                hb.Heal(1);
+            }
+            else if (Input.GetAxis("Vertical") < 0)
+            {
+                changeHealth = true;
+                hb.Hit(1);
+            }
+        }
+        else if (Input.GetAxis("Vertical") == 0)
+        {
+            changeHealth = false;
+        }
 
         if (horizontalMove == 0)
         {
@@ -76,6 +98,7 @@ public class PlayerController : MonoBehaviour
 
             if (Input.GetAxis("Jump") > 0)
             {
+                rb.velocity = new Vector2(rb.velocity.x, 0f);
                 rb.AddForce(new Vector2(0.0f, jumpForce));
                 isGrounded = false;
                 anim.SetBool("isJumping", true);

@@ -87,6 +87,7 @@ public class HealthBar : MonoBehaviour
             {
                 img.sprite = emptyHeart;
             }
+            index++;
         }
     }
 }
