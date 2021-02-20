@@ -106,9 +106,9 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (collision.gameObject.tag == "smallGem")
+        if (collision.gameObject.tag == "Gem")
         {
-            score += 1;
+            score += collision.gameObject.GetComponent<FloatingCollectible>().GetPoints();
             scoreText.text = score.ToString();
             Destroy(collision.gameObject);
         }

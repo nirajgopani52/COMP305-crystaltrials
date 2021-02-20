@@ -4,8 +4,8 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - smallGem
   - Enemy
+  - Gem
   layers:
   - Default
   - TransparentFX
