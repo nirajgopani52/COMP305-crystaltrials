@@ -21,7 +21,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Transform groundCheckPos;
     [SerializeField] private LayerMask whatIsGround;
 
-    [SerializeField] private float bounceForce = 100f;
+    [SerializeField] private float bounceForce = 500f;
+    [SerializeField] private float bounceCheckRadius = 0.2f;
     [SerializeField] private LayerMask whatIsEnemy;
     private float enemyBounceFrames = 0; // number of frames after bouncing off an enemy where the player can input a jump to gain extra height
 
@@ -86,6 +87,7 @@ public class PlayerController : MonoBehaviour
 
             if (Input.GetAxis("Jump") > 0)
             {
+                rb.velocity = new Vector2(rb.velocity.x, 0f);
                 rb.AddForce(new Vector2(0f, bounceForce));
                 enemyBounceFrames = 0;
             }
@@ -93,7 +95,7 @@ public class PlayerController : MonoBehaviour
         else if (rb.velocity.y < 0 && EnemyBounceCheck())
         {
             rb.velocity = new Vector2(rb.velocity.x, 0f);
-            rb.AddForce(new Vector2(0.0f, jumpForce));
+            rb.AddForce(new Vector2(0.0f, bounceForce/2));
             anim.SetTrigger("bounce");
             // set an amount of time where the player can boost their jump
             enemyBounceFrames = 3;
@@ -120,6 +122,13 @@ public class PlayerController : MonoBehaviour
     private bool EnemyBounceCheck()
     {
         // might make it a seperate radius value later
-        return Physics2D.OverlapCircle(groundCheckPos.position, groundCheckRadius, whatIsEnemy);
+        Collider2D collider = Physics2D.OverlapCircle(groundCheckPos.position, bounceCheckRadius, whatIsEnemy);
+
+        if (collider && collider.gameObject.tag == ("Enemy"))
+        {
+            collider.gameObject.GetComponent<Staggerable>().Hit();
+        }
+
+        return collider;
     }
 }
