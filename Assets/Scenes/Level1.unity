@@ -1501,9 +1501,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 672292425}
-  - component: {fileID: 672292428}
   - component: {fileID: 672292427}
   - component: {fileID: 672292426}
+  - component: {fileID: 672292428}
   m_Layer: 7
   m_Name: Enemy1
   m_TagString: Untagged
@@ -1540,7 +1540,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   player: {fileID: 1909502595}
   leftBound: 12
-  rightBound: 5
+  rightBound: 4
   speed: 3
 --- !u!50 &672292427
 Rigidbody2D:
@@ -1563,8 +1563,8 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 0
---- !u!70 &672292428
-CapsuleCollider2D:
+--- !u!58 &672292428
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -1576,9 +1576,9 @@ CapsuleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.010256767, y: -0.68983865}
-  m_Size: {x: 0.72945976, y: 0.89664316}
-  m_Direction: 0
+  m_Offset: {x: 0, y: -0.6}
+  serializedVersion: 2
+  m_Radius: 0.45
 --- !u!1 &846507600
 GameObject:
   m_ObjectHideFlags: 0
@@ -2846,6 +2846,10 @@ MonoBehaviour:
   whatIsGround:
     serializedVersion: 2
     m_Bits: 64
+  bounceForce: 200
+  whatIsEnemy:
+    serializedVersion: 2
+    m_Bits: 128
   anim: {fileID: 920200657}
   scoreText: {fileID: 193771491}
 --- !u!1 &2087066973

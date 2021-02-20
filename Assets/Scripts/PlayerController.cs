@@ -17,8 +17,14 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private float speed = 10f;
     [SerializeField] private float jumpForce = 500f;
     [SerializeField] private float groundCheckRadius = 0.15f;
+
     [SerializeField] private Transform groundCheckPos;
     [SerializeField] private LayerMask whatIsGround;
+
+    [SerializeField] private float bounceForce = 100f;
+    [SerializeField] private LayerMask whatIsEnemy;
+    private float enemyBounceFrames = 0; // number of frames after bouncing off an enemy where the player can input a jump to gain extra height
+
     // the animator is in a child component to account for the sprite offset when flipping
     [SerializeField] private Animator anim;
     [SerializeField] private Text scoreText;
@@ -74,6 +80,24 @@ public class PlayerController : MonoBehaviour
                 anim.SetBool("isJumping", true);
             }
         }
+        else if (enemyBounceFrames > 0)
+        {
+            enemyBounceFrames--;
+
+            if (Input.GetAxis("Jump") > 0)
+            {
+                rb.AddForce(new Vector2(0f, bounceForce));
+                enemyBounceFrames = 0;
+            }
+        }
+        else if (rb.velocity.y < 0 && EnemyBounceCheck())
+        {
+            rb.velocity = new Vector2(rb.velocity.x, 0f);
+            rb.AddForce(new Vector2(0.0f, jumpForce));
+            anim.SetTrigger("bounce");
+            // set an amount of time where the player can boost their jump
+            enemyBounceFrames = 3;
+        }
 
         rb.velocity = new Vector2(horizontalMove * speed, rb.velocity.y);
     }
@@ -93,5 +117,9 @@ public class PlayerController : MonoBehaviour
         return Physics2D.OverlapCircle(groundCheckPos.position, groundCheckRadius, whatIsGround);
     }
 
-
+    private bool EnemyBounceCheck()
+    {
+        // might make it a seperate radius value later
+        return Physics2D.OverlapCircle(groundCheckPos.position, groundCheckRadius, whatIsEnemy);
+    }
 }
