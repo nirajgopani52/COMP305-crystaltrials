@@ -10,6 +10,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -20,9 +21,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask whatIsGround;
     // the animator is in a child component to account for the sprite offset when flipping
     [SerializeField] private Animator anim;
+    [SerializeField] private Text scoreText;
 
     private Rigidbody2D rb;
     private bool isGrounded;
+
+    private int score;
 
     // Start is called before the first frame update
     void Start()
@@ -74,8 +78,20 @@ public class PlayerController : MonoBehaviour
         rb.velocity = new Vector2(horizontalMove * speed, rb.velocity.y);
     }
 
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.gameObject.tag == "smallGem")
+        {
+            score += 1;
+            scoreText.text = score.ToString();
+            Destroy(collision.gameObject);
+        }
+    }
+
     private bool GroundCheck()
     {
         return Physics2D.OverlapCircle(groundCheckPos.position, groundCheckRadius, whatIsGround);
     }
+
+
 }
