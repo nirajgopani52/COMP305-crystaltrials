@@ -1,3 +1,12 @@
+/* Enemy1Controller.cs
+ * -------------------------------
+ * Authors:
+ *      - Jay Ganguli
+ *      - 
+ *      - 
+ * 
+ * Last edited: 2021-03-19
+ */
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;

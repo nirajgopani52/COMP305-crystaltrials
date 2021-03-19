@@ -1,3 +1,12 @@
+/* CreepyCrawlerController.cs
+ * -------------------------------
+ * Authors:
+ *      - Jay Ganguli
+ *      - 
+ *      - 
+ * 
+ * Last edited: 2021-03-119
+ */
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
