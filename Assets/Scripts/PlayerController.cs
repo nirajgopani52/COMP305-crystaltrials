@@ -31,11 +31,17 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private Text scoreText;
     [SerializeField] private HealthBar hb;
 
+    [SerializeField] private Transform attackPos;
+    [SerializeField] private float attackRadius = 0.5f;
+
     private Rigidbody2D rb;
     private bool isGrounded;
 
     private int score;
     private float hitstun = 0f; // when the player gets hit and has hitstun, they cannot move
+
+    private float attackCooldown = 0f;
+    private bool isAttacking = true;
 
     // Start is called before the first frame update
     void Start()
@@ -69,7 +75,24 @@ public class PlayerController : MonoBehaviour
                 anim.SetBool("isRunning", true);
             }
 
+            if (attackCooldown <= 0)
+            {
 
+                if (Input.GetAxis("Fire1") > 0)
+                {
+                    anim.SetTrigger("attack");
+                    attackCooldown = 0.3f;
+                    isAttacking = true;
+                }
+            }
+            else
+            {
+                attackCooldown -= Time.fixedDeltaTime;
+                if (isAttacking)
+                {
+                    Strike();
+                }
+            }
 
             // jump code
             if (isGrounded)
@@ -149,6 +172,35 @@ public class PlayerController : MonoBehaviour
         return collider;
     }
 
+    private void Strike()
+    {
+        Collider2D collider = Physics2D.OverlapCircle(attackPos.position, attackRadius, whatIsEnemy);
+
+        if (collider)
+        {
+            isAttacking = false;
+
+            if (collider.gameObject.CompareTag("CaveBat"))
+            {
+                Enemy1Controller enemy = collider.gameObject.GetComponent<Enemy1Controller>();
+                if (enemy.enabled)
+                {
+                    enemy.Hit(1);
+                }
+                return;
+            }
+            if (collider.gameObject.CompareTag("CreepyCrawler"))
+            {
+                CreepyCrawlerController enemy = collider.gameObject.GetComponent<CreepyCrawlerController>();
+                if (enemy.enabled)
+                {
+                    enemy.Hit(1);
+                }
+                return;
+            }
+        }
+    }
+
     public void Hit(int damage)
     {
         hb.Hit(damage);
@@ -177,5 +229,8 @@ public class PlayerController : MonoBehaviour
     {
         Gizmos.color = Color.cyan;
         Gizmos.DrawWireCube(groundCheckPos.position, new Vector3(0.5f, bounceCheckHeight, 0f));
+
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(attackPos.position, attackRadius);
     }
 }

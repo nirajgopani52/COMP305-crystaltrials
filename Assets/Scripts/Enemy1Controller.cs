@@ -6,13 +6,14 @@ public class Enemy1Controller : MonoBehaviour
 {
     // controller for the bat-like enemy. This enemy has no gravity (since it flyes around) and
     // should patrol left and right within a horizontal area
-    [SerializeField] private Transform player;
+    [SerializeField] private GameObject player;
 
     [SerializeField] private float leftBound;
     [SerializeField] private float rightBound;
     [SerializeField] private float speed;
 
     [SerializeField] private int health = 1;
+    [SerializeField] private Animator anim;
 
     private float xOrigin; // the original x position of this enemy
     private int aiState = 1; // integer representing what the enemy is currently doing (1 = moving left, 2 = mobing right, etc)
@@ -24,10 +25,16 @@ public class Enemy1Controller : MonoBehaviour
     {
         xOrigin = transform.position.x;
         rb = GetComponent<Rigidbody2D>();
+        player = GameObject.Find("Player");
     }
 
     private void FixedUpdate()
     {
+        if (health <= 0)
+        {
+            return;
+        }
+
         // check if the enemy has reached the edge of its path
         if (transform.position.x <= xOrigin - leftBound)
         {
@@ -54,10 +61,14 @@ public class Enemy1Controller : MonoBehaviour
     {
         health -= damage;
 
+        anim.SetTrigger("hit");
+
         if (health <= 0)
         {
-            rb.AddForce((transform.position - player.position).normalized * 500f);
-            Destroy(gameObject, 1f);
+            rb.bodyType = RigidbodyType2D.Dynamic;
+            Vector2 knockback = new Vector2(transform.position.x - player.transform.position.x, transform.position.y - player.transform.position.y);
+            rb.AddForce((knockback.normalized + new Vector2(0f, 1f)) * 500f);
+            Destroy(gameObject, 0.5f);
         }
     }
 

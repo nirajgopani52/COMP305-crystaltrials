@@ -115,10 +115,13 @@ public class CreepyCrawlerController : MonoBehaviour
     {
         health -= damage;
 
+        anim.SetTrigger("hit");
+
         if (health <= 0)
         {
-            rb.AddForce((transform.position - player.transform.position).normalized * 500f);
-            Destroy(gameObject, 1f);
+            Vector2 knockback = new Vector2(transform.position.x - player.transform.position.x, transform.position.y - player.transform.position.y);
+            rb.AddForce((knockback.normalized + new Vector2(0f, 1f)) * 500f);
+            Destroy(gameObject, 0.5f);
         }
     }
 }
