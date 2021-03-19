@@ -7,6 +7,7 @@ TagManager:
   - Gem
   - CaveBat
   - CreepyCrawler
+  - Spikes
   layers:
   - Default
   - TransparentFX
