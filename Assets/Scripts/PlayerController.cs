@@ -125,8 +125,8 @@ public class PlayerController : MonoBehaviour
 
     private bool EnemyBounceCheck()
     {
-        // might make it a seperate radius value later
-        Collider2D collider = Physics2D.OverlapBox(groundCheckPos.position, new Vector2(0.6f, bounceCheckHeight), 0f, whatIsEnemy);
+        // might make it a seperate width value later
+        Collider2D collider = Physics2D.OverlapBox(groundCheckPos.position, new Vector2(0.5f, bounceCheckHeight), 0f, whatIsEnemy);
 
         if (collider)
         {
@@ -149,18 +149,25 @@ public class PlayerController : MonoBehaviour
 
     public void Hit(int damage, Vector2 damageSource, float knockbackForce)
     {
+        if (hitstun > 0 || enemyBounceFrames > 0)
+        {
+            return; // if Gino is already being hit by something, don't hit them again
+        }
+
         hb.Hit(damage);
         anim.SetTrigger("hit");
         Vector2 knockbackDirection = new Vector2(transform.position.x - damageSource.x, transform.position.y - damageSource.y).normalized;
         // the new vector2 in here is a constant amount of vertical knockup to the player always gets bumped slightly upwards
+        rb.velocity = Vector2.zero;
         rb.AddForce((knockbackDirection + new Vector2(0f, 1f)) * knockbackForce);
 
         hitstun = 0.2f;
+        enemyBounceFrames = 0; // prevent player from jumping out of hitstun if both the bounce hitbox and damage hitbox trigger at the same time
     }
 
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.cyan;
-        Gizmos.DrawWireCube(groundCheckPos.position, new Vector3(0.6f, bounceCheckHeight, 0f));
+        Gizmos.DrawWireCube(groundCheckPos.position, new Vector3(0.5f, bounceCheckHeight, 0f));
     }
 }
