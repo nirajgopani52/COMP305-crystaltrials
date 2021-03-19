@@ -22,109 +22,90 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private LayerMask whatIsGround;
 
     [SerializeField] private float bounceForce = 500f;
-    [SerializeField] private float bounceCheckRadius = 0.2f;
+    [SerializeField] private float bounceCheckHeight = 0.2f;
     [SerializeField] private LayerMask whatIsEnemy;
     private float enemyBounceFrames = 0; // number of frames after bouncing off an enemy where the player can input a jump to gain extra height
 
     // the animator is in a child component to account for the sprite offset when flipping
     [SerializeField] private Animator anim;
     [SerializeField] private Text scoreText;
+    [SerializeField] private HealthBar hb;
 
     private Rigidbody2D rb;
     private bool isGrounded;
 
     private int score;
-
-    private bool changeHealth = false; // this is for demo purposes. remove later
-    [SerializeField] private HealthBar hb;
+    private float hitstun = 0f; // when the player gets hit and has hitstun, they cannot move
 
     // Start is called before the first frame update
     void Start()
     {
         rb = GetComponent<Rigidbody2D>();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
+    } 
 
     private void FixedUpdate()
     {
-        float horizontalMove = Input.GetAxis("Horizontal");
-        isGrounded = GroundCheck();
-
-        // healthbar demo
-        if (changeHealth == false)
+        if (hitstun > 0)
         {
-            if (Input.GetAxis("Vertical") > 0)
-            {
-                changeHealth = true;
-                hb.Heal(1);
-            }
-            else if (Input.GetAxis("Vertical") < 0)
-            {
-                changeHealth = true;
-                hb.Hit(1);
-            }
-        }
-        else if (Input.GetAxis("Vertical") == 0)
-        {
-            changeHealth = false;
-        }
-
-        if (horizontalMove == 0)
-        {
-            anim.SetBool("isRunning", false);
-        }
-        else if (horizontalMove > 0)
-        {
-            transform.localScale = new Vector3(1, 1, 1); // face right
-            anim.SetBool("isRunning", true);
+            hitstun -= Time.fixedDeltaTime;
         }
         else
         {
-            transform.localScale = new Vector3(-1, 1, 1); // face left
-            anim.SetBool("isRunning", true);
-        }
+            float horizontalMove = Input.GetAxis("Horizontal");
+            isGrounded = GroundCheck();
+
+            if (horizontalMove == 0)
+            {
+                anim.SetBool("isRunning", false);
+            }
+            else if (horizontalMove > 0)
+            {
+                transform.localScale = new Vector3(1, 1, 1); // face right
+                anim.SetBool("isRunning", true);
+            }
+            else
+            {
+                transform.localScale = new Vector3(-1, 1, 1); // face left
+                anim.SetBool("isRunning", true);
+            }
 
 
 
-        // jump code
-        if (isGrounded)
-        {
-            anim.SetBool("isJumping", false);
+            // jump code
+            if (isGrounded)
+            {
+                anim.SetBool("isJumping", false);
 
-            if (Input.GetAxis("Jump") > 0)
+                if (Input.GetAxis("Jump") > 0)
+                {
+                    rb.velocity = new Vector2(rb.velocity.x, 0f);
+                    rb.AddForce(new Vector2(0.0f, jumpForce));
+                    isGrounded = false;
+                    anim.SetBool("isJumping", true);
+                }
+            }
+            else if (enemyBounceFrames > 0)
+            {
+                enemyBounceFrames--;
+
+                if (Input.GetAxis("Jump") > 0)
+                {
+                    rb.velocity = new Vector2(rb.velocity.x, 0f);
+                    rb.AddForce(new Vector2(0f, bounceForce));
+                    enemyBounceFrames = 0;
+                }
+            }
+            else if (rb.velocity.y < 0 && EnemyBounceCheck())
             {
                 rb.velocity = new Vector2(rb.velocity.x, 0f);
-                rb.AddForce(new Vector2(0.0f, jumpForce));
-                isGrounded = false;
-                anim.SetBool("isJumping", true);
+                rb.AddForce(new Vector2(0.0f, bounceForce / 2));
+                anim.SetTrigger("bounce");
+                // set an amount of time where the player can boost their jump
+                enemyBounceFrames = 3;
             }
-        }
-        else if (enemyBounceFrames > 0)
-        {
-            enemyBounceFrames--;
 
-            if (Input.GetAxis("Jump") > 0)
-            {
-                rb.velocity = new Vector2(rb.velocity.x, 0f);
-                rb.AddForce(new Vector2(0f, bounceForce));
-                enemyBounceFrames = 0;
-            }
+            rb.velocity = new Vector2(horizontalMove * speed, rb.velocity.y);
         }
-        else if (rb.velocity.y < 0 && EnemyBounceCheck())
-        {
-            rb.velocity = new Vector2(rb.velocity.x, 0f);
-            rb.AddForce(new Vector2(0.0f, bounceForce/2));
-            anim.SetTrigger("bounce");
-            // set an amount of time where the player can boost their jump
-            enemyBounceFrames = 3;
-        }
-
-        rb.velocity = new Vector2(horizontalMove * speed, rb.velocity.y);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -145,13 +126,41 @@ public class PlayerController : MonoBehaviour
     private bool EnemyBounceCheck()
     {
         // might make it a seperate radius value later
-        Collider2D collider = Physics2D.OverlapCircle(groundCheckPos.position, bounceCheckRadius, whatIsEnemy);
+        Collider2D collider = Physics2D.OverlapBox(groundCheckPos.position, new Vector2(0.6f, bounceCheckHeight), 0f, whatIsEnemy);
 
-        if (collider && collider.gameObject.tag == ("Enemy"))
+        if (collider)
         {
-            collider.gameObject.GetComponent<Staggerable>().Hit();
+            Staggerable enemy = collider.gameObject.GetComponent<Staggerable>();
+
+            if (enemy)
+            {
+                enemy.Hit();
+            }
         }
 
         return collider;
+    }
+
+    public void Hit(int damage)
+    {
+        hb.Hit(damage);
+        anim.SetTrigger("hit");
+    }
+
+    public void Hit(int damage, Vector2 damageSource, float knockbackForce)
+    {
+        hb.Hit(damage);
+        anim.SetTrigger("hit");
+        Vector2 knockbackDirection = new Vector2(transform.position.x - damageSource.x, transform.position.y - damageSource.y).normalized;
+        // the new vector2 in here is a constant amount of vertical knockup to the player always gets bumped slightly upwards
+        rb.AddForce((knockbackDirection + new Vector2(0f, 1f)) * knockbackForce);
+
+        hitstun = 0.2f;
+    }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.cyan;
+        Gizmos.DrawWireCube(groundCheckPos.position, new Vector3(0.6f, bounceCheckHeight, 0f));
     }
 }

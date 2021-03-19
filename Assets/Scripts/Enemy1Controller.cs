@@ -7,9 +7,12 @@ public class Enemy1Controller : MonoBehaviour
     // controller for the bat-like enemy. This enemy has no gravity (since it flyes around) and
     // should patrol left and right within a horizontal area
     [SerializeField] private Transform player;
+
     [SerializeField] private float leftBound;
     [SerializeField] private float rightBound;
     [SerializeField] private float speed;
+
+    [SerializeField] private int health = 1;
 
     private float xOrigin; // the original x position of this enemy
     private int aiState = 1; // integer representing what the enemy is currently doing (1 = moving left, 2 = mobing right, etc)
@@ -44,6 +47,17 @@ public class Enemy1Controller : MonoBehaviour
         {
             rb.velocity = new Vector2(speed, 0f);
             transform.localScale = new Vector3(1f, 1f, 1f);
+        }
+    }
+
+    public void Hit(int damage)
+    {
+        health -= damage;
+
+        if (health <= 0)
+        {
+            rb.AddForce((transform.position - player.position).normalized * 500f);
+            Destroy(gameObject, 1f);
         }
     }
 

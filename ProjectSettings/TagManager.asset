@@ -4,8 +4,9 @@
 TagManager:
   serializedVersion: 2
   tags:
-  - Enemy
   - Gem
+  - CaveBat
+  - CreepyCrawler
   layers:
   - Default
   - TransparentFX
@@ -16,7 +17,7 @@ TagManager:
   - Ground
   - Enemy
   - Collectible
-  - 
+  - Player
   - 
   - 
   - 
